@@ -126,9 +126,12 @@ Keep options small: required `memory` + `agent`, then optional scoping (`session
 
 ## Limitations
 
-- `BaseMemory` is legacy in LangChain 1.x / LangGraph apps.
-- Exact `get`/`delete` after restart is best-effort via metadata-filtered recall; in-process cache is authoritative within a run.
+- **Not exact-match KV.** LangGraph `BaseStore` semantics are exact get/put by namespace+key. Wolbarg’s core primitive is **semantic recall**. This adapter is a hybrid:
+  - `put` → `remember` (stores text + namespace/key metadata)
+  - `get` / `delete` → exact-via-metadata (and an in-process cache). After restart, exact `get`/`delete` is **best-effort** via metadata-filtered recall — not a durable KV index.
+  - `search` (+ `query`) → semantic `recall` (not SQL/`=` key lookup)
 - `listNamespaces` only reflects namespaces seen in this process.
+- `BaseMemory` is legacy in LangChain 1.x / LangGraph apps — prefer `WolbargStore` for new work.
 - Does not replace LangGraph checkpointers (short-term thread state).
 
 ## Migration Guide
